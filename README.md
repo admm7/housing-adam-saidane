@@ -1,5 +1,18 @@
 # Pour l'étape 2
 
+# Housing API
+
+Ce projet est une API Flask connectée à une base de données PostgreSQL pour gérer les informations de maisons.
+
+## Installation
+
+Clonez ce dépôt et installez les dépendances :
+
+```bash
+git clone https://github.com/admm7/housing-adam-saidane.git
+cd housing-adam-saidane
+pip install -r requirements.txt
+
 Voici les commandes que j'ai taper pour que ça fonctionne, 
 vous trouverez également un fichier word contenant les différentes captures d'écran des mes étapes réalisées
 
