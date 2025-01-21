@@ -1,38 +1,105 @@
-# Pour l'étape 2
+# Housing API - Étape 2
 
-# Housing API
+Ce projet est une API Flask connectée à une base de données PostgreSQL pour gérer les informations de maisons. Cette API permet d'ajouter, de récupérer et de vérifier les données des maisons stockées dans une base de données.
 
-Ce projet est une API Flask connectée à une base de données PostgreSQL pour gérer les informations de maisons.
+## Prérequis
 
-## Installation
+Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votre machine :
+- **Docker** et **Docker Compose**
+- **Git**
+- **Python 3.9** ou une version compatible
 
-Clonez ce dépôt et installez les dépendances :
+## Installation et Lancement
+
+### 1. Cloner le dépôt
+
+Clonez ce dépôt Git en local avec la commande suivante :
 
 ```bash
 git clone https://github.com/admm7/housing-adam-saidane.git
 cd housing-adam-saidane
+```
+
+### 2. Installer les dépendances Python
+
+Installez les dépendances nécessaires avec la commande suivante :
+
+```bash
 pip install -r requirements.txt
+```
 
-Voici les commandes que j'ai taper pour que ça fonctionne, 
-vous trouverez également un fichier word contenant les différentes captures d'écran des mes étapes réalisées
+### 3. Lancer les conteneurs avec Docker Compose
 
-docker compose-down
+Exécutez les commandes suivantes pour lancer les conteneurs Docker, y compris celui de l'API et de la base de données PostgreSQL :
+
+```bash
+docker-compose down
 docker-compose up --build
+```
 
-" en faisant ça, cela m'a permis de lancer les conteneur particulièrement celui de l'Api et de la base de donnée "
+Une fois les conteneurs démarrés, l'API sera accessible via l'adresse suivante :  
+**http://127.0.0.1:5000**
 
-Cela est bien fonctionnel, et m'a donné une adresse à accéder : http://127.0.0.1:5000
+### 4. Vérification de la connectivité des conteneurs
 
-En accédant à cette adresse j'avais bien un message qui me dis " Connexion à la base de données réussie !"
+#### Tester la connexion à la base de données
+Pour vérifier si l'API est bien connectée à la base de données, ouvrez un navigateur ou utilisez `curl` pour accéder à l'URL suivante :
 
-Ensuite j'ai tester les deux conteneurs pour vérifier leur connectivité, donc entre l'API et la base de donnée
+```bash
+curl http://127.0.0.1:5000
+```
 
-curl http://127.0.0.1:5000/test_db'
+Vous devriez voir le message suivant :  
+**"Connexion à la base de données réussie !"**
 
-Cela m'a bien affiché, dans l'URL http://127.0.0.1:5000/test_db,  "Found 1 houses in the database."
+#### Tester les données de la base
+Vous pouvez ensuite vérifier si l'API et la base de données communiquent correctement avec l'URL suivante :
 
+```bash
+curl http://127.0.0.1:5000/test_db
+```
+
+Cela devrait retourner une réponse comme :  
+**"Found 1 houses in the database."**
+
+#### Récupérer toutes les maisons
+Pour récupérer les informations des maisons dans la base de données, utilisez l'URL suivante :
+
+```bash
 curl http://127.0.0.1:5000/houses
+```
 
-En accédant à l'URL, les données sont afficher ce qui montre bien que les deux conteneurs sont connectés entre eux
+Cela retournera les données stockées dans la base de données sous forme de JSON.
+
+---
+
+## Fonctionnalités de l'API
+
+- **GET /** : Vérifie la connexion à la base de données.
+- **GET /test_db** : Vérifie la connectivité entre l'API et la base de données et retourne le nombre de maisons dans la base.
+- **GET /houses** : Récupère la liste complète des maisons dans la base de données.
+- **POST /houses** : Ajoute une nouvelle maison à la base de données. Exemple de corps JSON pour l'ajout :
+  ```json
+  {
+      "longitude": -122.23,
+      "latitude": 37.88,
+      "housing_median_age": 41,
+      "total_rooms": 880,
+      "total_bedrooms": 129,
+      "population": 322,
+      "households": 126,
+      "median_income": 8.3252,
+      "median_house_value": 452600,
+      "ocean_proximity": "NEAR BAY"
+  }
+  ```
+
+---
+
+## Captures d'écran
+
+Un fichier Word contenant toutes les captures d'écran des étapes réalisées est disponible dans le dépôt pour référence.
+
+---
 
 
