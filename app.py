@@ -1,18 +1,21 @@
+# Importation des modules nécessaires
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text  # Importer text pour les requêtes SQL explicites
+from sqlalchemy.exc import SQLAlchemyError
 from config import Config
 import os
+from flask_migrate import Migrate
 
 # Fix pour l'encodage UTF-8
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
 # Initialisation de l'application Flask et de SQLAlchemy
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(Config)  # Charger la configuration depuis le fichier config.py
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-# Définir le modèle House correspondant à la table `houses` dans PostgreSQL
+# Définir le modèle House
 class House(db.Model):
     __tablename__ = 'houses'
 
@@ -32,21 +35,16 @@ class House(db.Model):
 @app.route('/')
 def test_connection():
     try:
-        # Test de la connexion
-        db.session.execute(text('SELECT 1'))
-        return "Connexion à la base de données réussie !"
-    except Exception as e:
-        # Débogage : Affichez les informations exactes de l'erreur
-        return f"Erreur de connexion : {e}, Position : {e.args if hasattr(e, 'args') else 'Pas de détails supplémentaires'}"
+        db.session.execute('SELECT 1')  # Tester une requête simple
+        return "Connexion à la base de données réussie !", 200
+    except SQLAlchemyError as e:
+        return jsonify({"error": f"Erreur de connexion : {str(e)}"}), 500
 
-# Route pour ajouter une maison dans la base de données
+# Route pour ajouter une maison
 @app.route('/houses', methods=['POST'])
 def add_house():
     try:
-        # Récupérer les données JSON envoyées dans la requête
         data = request.get_json()
-
-        # Vérifier que toutes les clés nécessaires sont présentes
         required_fields = [
             'longitude', 'latitude', 'housing_median_age',
             'total_rooms', 'total_bedrooms', 'population',
@@ -56,7 +54,6 @@ def add_house():
             if field not in data:
                 return jsonify({"error": f"Le champ '{field}' est manquant."}), 400
 
-        # Créer une instance du modèle House
         new_house = House(
             longitude=data['longitude'],
             latitude=data['latitude'],
@@ -70,14 +67,14 @@ def add_house():
             ocean_proximity=data['ocean_proximity']
         )
 
-        # Ajouter la maison à la base de données
         db.session.add(new_house)
         db.session.commit()
-
         return jsonify({"message": "Maison ajoutée avec succès !"}), 201
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": f"Erreur SQL : {str(e)}"}), 400
     except Exception as e:
-        db.session.rollback()  # Annuler les modifications en cas d'erreur
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": f"Erreur serveur : {str(e)}"}), 500
 
 # Route pour récupérer toutes les maisons
 @app.route('/houses', methods=['GET'])
@@ -101,8 +98,28 @@ def get_houses():
             for house in houses
         ]
         return jsonify(houses_list), 200
+    except SQLAlchemyError as e:
+        return jsonify({"error": f"Erreur SQL : {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Erreur serveur : {str(e)}"}), 500
+    
+@app.route('/test_db', methods=['GET'])
+def test_db():
+    try:
+        houses = House.query.all()
+        return f"Found {len(houses)} houses in the database.", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+@app.route('/test_houses', methods=['GET'])
+def test_houses():
+    try:
+        result = db.session.execute("SELECT * FROM houses").fetchall()
+        houses = [dict(row) for row in result]
+        return jsonify(houses), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Point d'entrée
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
