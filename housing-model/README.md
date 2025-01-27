@@ -99,35 +99,6 @@ docker run -d -p 5000:5000 housing-model
 
 ---
 
-## Publier le conteneur sur Docker Hub
-
-### 1. Taguer l'image Docker
-```bash
-docker tag housing-model admm7/housing-model:latest
-```
-
-### 2. Pousser l'image sur Docker Hub
-```bash
-docker push admm7/housing-model:latest
-```
-
----
-
-## Documentation
-
-Ajoutez des informations complémentaires comme les variables d'environnement, la description des champs dans `features`, ou des exemples d'utilisation avancée.
-
----
-
-## Contribution
-
-Si vous souhaitez contribuer :
-1. Forkez le dépôt.
-2. Créez une branche pour vos modifications : `git checkout -b feature/ma-fonctionnalite`.
-3. Envoyez une pull request.
-
----
-
 ## License
 
 Ce projet est sous licence MIT. Consultez le fichier LICENSE pour plus de détails.
