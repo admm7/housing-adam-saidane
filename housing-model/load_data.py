@@ -1,4 +1,3 @@
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -7,7 +6,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-import joblib
+import mlflow
+import mlflow.sklearn
+import pandas as pd
+import os
+import shutil
 
 # Charger les données
 housing = pd.read_csv("housing.csv")
@@ -130,50 +133,52 @@ models = {
     "Linear Regression": LinearRegression(),
     "Gradient Boosting": GradientBoostingRegressor(random_state=42),
 }
+# Supprimer l'expérience MLflow si elle est corrompue
+mlruns_path = "mlruns/HousingPrediction"
+if os.path.exists(mlruns_path):
+    shutil.rmtree(mlruns_path)
+    print(" Expérience MLflow corrompue supprimée !")
 
+# Créer une nouvelle expérience MLflow propre
+mlflow.set_experiment("Housing Prediction")
+print(" Nouvelle expérience 'Housing Prediction' créée avec succès.")
 # Stocker les résultats
 results = {}
+# 🚀 Démarrer une exécution principale
+with mlflow.start_run(run_name="Main Experiment") as main_run:
+    for model_name, model in models.items():
+        with mlflow.start_run(nested=True, run_name=model_name):
+            print(f"\n🔹 Entraînement du modèle : {model_name}")
 
-# Tester chaque modèle
-for model_name, model in models.items():
-    print(f"\nModèle : {model_name}")
-    
-    # Entraîner le modèle
-    model.fit(X_train, y_train)
-    
-    # Prédire sur le jeu de test
-    y_pred = model.predict(X_test)
-    
-    # Évaluer le modèle
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    
-    # Stocker les résultats
-    results[model_name] = {"MSE": mse, "R2": r2}
-    
-    # Afficher les performances
-    print(f"Mean Squared Error (MSE) : {mse:.2f}")
-    print(f"Coefficient de détermination (R²) : {r2:.2f}")
-    
-    # Visualisation des prédictions vs valeurs réelles
-    plt.figure(figsize=(8, 6))
-    plt.scatter(y_test, y_pred, alpha=0.5)
-    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', lw=2)
-    plt.title(f"Valeurs réelles vs Valeurs prédites ({model_name})")
-    plt.xlabel("Valeurs réelles")
-    plt.ylabel("Valeurs prédites")
-    plt.show()
+            # Entraîner le modèle
+            model.fit(X_train, y_train)
 
-# Résumé des performances
-print("\nRésumé des performances des modèles :")
-for model_name, metrics in results.items():
-    print(f"{model_name} -> MSE: {metrics['MSE']:.2f}, R²: {metrics['R2']:.2f}")
+            # Prédiction et évaluation
+            y_pred = model.predict(X_test)
+            mse = mean_squared_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
 
-# Trouver le meilleur modèle
-best_model = min(results, key=lambda x: results[x]["MSE"])
-print(f"\nMeilleur modèle : {best_model} avec MSE = {results[best_model]['MSE']:.2f} et R² = {results[best_model]['R2']:.2f}")
+            # Stocker les résultats
+            results[model_name] = {"MSE": mse, "R2": r2}
 
-# Sauvegarder le meilleur modèle
-best_model_instance = models[best_model]
-joblib.dump(best_model_instance, "best_model.pkl")
-print(f"\nLe modèle '{best_model}' a été sauvegardé dans 'best_model.pkl'.")
+            print(f"📉 {model_name} -> MSE: {mse:.2f}, R²: {r2:.2f}")
+
+            # Enregistrer les métriques et paramètres avec MLflow
+            mlflow.log_param("model_name", model_name)
+            mlflow.log_metric("MSE", mse)
+            mlflow.log_metric("R2", r2)
+
+# Sélectionner le meilleur modèle (basé sur le plus faible MSE)
+best_model_name = min(results, key=lambda x: results[x]["MSE"])
+best_model = models[best_model_name]
+
+print(f"\n Meilleur modèle : {best_model_name} avec MSE = {results[best_model_name]['MSE']:.2f} et R² = {results[best_model_name]['R2']:.2f}")
+
+
+with mlflow.start_run(run_name="Best Model") as best_run:
+    mlflow.sklearn.log_model(best_model, "housing_model")
+    mlflow.log_param("best_model_name", best_model_name)
+    mlflow.log_metric("best_model_MSE", results[best_model_name]["MSE"])
+    mlflow.log_metric("best_model_R2", results[best_model_name]["R2"])
+
+print(f"\n Modèle {best_model_name} enregistré dans MLflow sous 'housing_model'")
