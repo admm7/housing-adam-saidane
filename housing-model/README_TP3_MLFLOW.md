@@ -118,6 +118,7 @@ git push origin main
 - **MLflow** est utilisé pour le suivi des expériences et le logging des modèles.
 - **Docker** permet le déploiement du modèle en tant qu'API.
 - **GitHub** assure la gestion et versioning du projet.
-
-🛠️ **Le projet est maintenant prêt pour être testé et amélioré !** 🚀
+- il faut savoir que les étapes dans le tp ou j'ai eu le plus de mal c'était le fait de pouvoir dockeriser car j'avais des soucis pour trouver les bons artefacts
+- donc c'était souvent des erreurs de chemin qui posait problème
+- mais j'ai malgré tout réussi à surmonter ces différentes diffcultés et j'ai fini ce tp par dockeriser avec ML flow , vous trouverez également un fichier word comme pour chaque tp, montrant les différentes étapes que j'ai réalisé durant le tp " voir capture d'écran "
 
