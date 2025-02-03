@@ -1,11 +1,11 @@
-# 📌 README - Housing Model avec MLflow et Docker
+#  README - Housing Model avec MLflow et Docker
 
-## 📢 Introduction
+##  Introduction
 Ce projet met en place un modèle de prédiction du prix des maisons en Californie en utilisant **MLflow** pour le suivi des expériences et **Docker** pour le déploiement du modèle en tant que service API.
 
 ---
 
-## 📂 Structure du projet
+##  Structure du projet
 ```
 /housing-adam-saidane
 │── housing-model
@@ -26,39 +26,39 @@ Ce projet met en place un modèle de prédiction du prix des maisons en Californ
 
 ---
 
-## 🔧 Installation
+##  Installation
 
-### 1️⃣ Cloner le projet
+### 1️ Cloner le projet
 ```sh
 git clone https://github.com/admm7/housing-adam-saidane.git
 cd housing-adam-saidane/housing-model
 ```
 
-### 2️⃣ Installer les dépendances
+### 2️ Installer les dépendances
 ```sh
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Lancer MLflow Tracking Server (optionnel)
+### 3️ Lancer MLflow Tracking Server (optionnel)
 ```sh
 mlflow ui --host 0.0.0.0 --port 5000
 ```
 ---
 
-## 🚀 Entraînement et Suivi avec MLflow
+##  Entraînement et Suivi avec MLflow
 
-### 4️⃣ Charger et nettoyer les données
+### 4️ Charger et nettoyer les données
 ```sh
 python load_data.py
 ```
 
-### 5️⃣ Entraîner les modèles avec MLflow
+### 5️ Entraîner les modèles avec MLflow
 ```sh
 python app.py
 ```
 *Ce script exécute plusieurs modèles (RandomForest, LinearRegression, GradientBoosting) et enregistre les métriques sur MLflow.*
 
-### 6️⃣ Vérifier les expérimentations sur MLflow
+### 6️ Vérifier les expérimentations sur MLflow
 Accédez à **MLflow UI** via :
 ```
 http://127.0.0.1:5000
@@ -66,28 +66,28 @@ http://127.0.0.1:5000
 
 ---
 
-## 🏗️ Dockerisation et Déploiement
+##  Dockerisation et Déploiement
 
-### 7️⃣ Construire l'image Docker
+### 7️ Construire l'image Docker
 ```sh
 docker build -t housing-model .
 ```
 
-### 8️⃣ Lancer le conteneur Docker
+### 8️ Lancer le conteneur Docker
 ```sh
 docker run -p 5001:8000 housing-model
 ```
 
-### 9️⃣ Vérifier si le modèle tourne
+### 9️ Vérifier si le modèle tourne
 ```sh
 curl http://127.0.0.1:5001/
 ```
 
 ---
 
-## 📡 Tester l'API
+##  Tester l'API
 
-### 🔍 Faire une requête POST à l'API Dockerisée
+###  Faire une requête POST à l'API Dockerisée
 ```sh
 curl -X POST http://127.0.0.1:5001/invocations \
      -H "Content-Type: application/json" \
@@ -98,14 +98,14 @@ curl -X POST http://127.0.0.1:5001/invocations \
      }}'
 ```
 
-✅ **Sortie attendue :**
+ **Sortie attendue :**
 ```json
 {"predictions": [482947.76]}
 ```
 
 ---
 
-## ⏫ Pusher sur GitHub
+##  Pusher sur GitHub
 ```sh
 git add .
 git commit -m "Mise à jour du modèle housing-model"
@@ -114,7 +114,7 @@ git push origin main
 
 ---
 
-## 🎯 Conclusion
+##  Conclusion
 - **MLflow** est utilisé pour le suivi des expériences et le logging des modèles.
 - **Docker** permet le déploiement du modèle en tant qu'API.
 - **GitHub** assure la gestion et versioning du projet.
