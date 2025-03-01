@@ -1,21 +1,22 @@
-version: '3'
-services:
-  mlflow-server:
-    image: ghcr.io/mlflow/mlflow:latest
-    container_name: mlflow-server
-    ports:
-      - "5000:5000"
-    environment:
-      - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db
-      - MLFLOW_ARTIFACT_ROOT=/mlflow-artifacts
-    volumes:
-      - ./mlflow:/mlflow-artifacts
+version: '3'  # Version de Docker Compose utilisée
 
-  housing-model:
-    image: housing-model
-    depends_on:
-      - mlflow-server
+services:
+  mlflow-server:  # Service MLflow pour suivre et stocker les expériences de Machine Learning
+    image: ghcr.io/mlflow/mlflow:latest  # Utilisation de l'image officielle de MLflow depuis GitHub Container Registry
+    container_name: mlflow-server  # Attribution d'un nom au conteneur pour une identification plus facile
     ports:
-      - "5001:8080"
+      - "5000:5000"  # Exposition du port 5000 pour accéder à l'interface de MLflow
     environment:
-      - MLFLOW_TRACKING_URI=http://mlflow-server:5000
+      - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db  # Stockage des métadonnées MLflow dans une base SQLite locale
+      - MLFLOW_ARTIFACT_ROOT=/mlflow-artifacts  # Emplacement des artefacts des modèles entraînés
+    volumes:
+      - ./mlflow:/mlflow-artifacts  # Stockage persistant des artefacts sur le système hôte
+
+  housing-model:  # Service de ton modèle de prédiction
+    image: housing-model  # Nom de l'image Docker qui contient ton modèle ML
+    depends_on:
+      - mlflow-server  # Ce service ne démarrera qu'après le démarrage de `mlflow-server`
+    ports:
+      - "5001:8080"  # Exposition du service du modèle sur le port 5001
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5000  # Configuration pour que MLflow stocke les logs sur `mlflow-server`
