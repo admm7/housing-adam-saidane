@@ -144,7 +144,7 @@ mlflow.set_experiment("Housing Prediction")
 print(" Nouvelle expérience 'Housing Prediction' créée avec succès.")
 # Stocker les résultats
 results = {}
-# 🚀 Démarrer une exécution principale
+# Démarrer une exécution principale
 with mlflow.start_run(run_name="Main Experiment") as main_run:
     for model_name, model in models.items():
         with mlflow.start_run(nested=True, run_name=model_name):
@@ -161,7 +161,7 @@ with mlflow.start_run(run_name="Main Experiment") as main_run:
             # Stocker les résultats
             results[model_name] = {"MSE": mse, "R2": r2}
 
-            print(f"📉 {model_name} -> MSE: {mse:.2f}, R²: {r2:.2f}")
+            print(f" {model_name} -> MSE: {mse:.2f}, R²: {r2:.2f}")
 
             # Enregistrer les métriques et paramètres avec MLflow
             mlflow.log_param("model_name", model_name)
