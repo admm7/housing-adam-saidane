@@ -104,7 +104,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:5001/houses" -Method Post -Headers @{"C
 ```powershell
 docker exec -it broker kafka-console-consumer --bootstrap-server broker:9092 --topic housing_topic --from-beginning
 ```
-📌 **Description** : Consomme les messages du topic Kafka `housing_topic` en affichant toutes les données depuis le début.
+ **Description** : Consomme les messages du topic Kafka `housing_topic` en affichant toutes les données depuis le début.
 
 ###  Vérification du fonctionnement de l'API
 ```powershell
@@ -118,7 +118,7 @@ Invoke-WebRequest -Uri "http://127.0.0.1:5002/predict" -Method POST -Headers @{"
 ```
  **Réponse** : `{"prediction": 443793.62}`
 
-### 🗄️ Requête SQL pour afficher les logements stockés
+### 🗄 Requête SQL pour afficher les logements stockés
 ```powershell
 docker exec -it housing-db psql -U housing_user -d housing -c "SELECT * FROM houses;"
 ```
