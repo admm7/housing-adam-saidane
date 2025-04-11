@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  broker:
+    image: confluentinc/cp-kafka:latest
+    container_name: broker
+    hostname: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"  # Port interne du broker Kafka
+      - "29092:29092"  # Port externe pour les clients
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LISTENERS: PLAINTEXT://broker:9092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "broker:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  housing-db:
+    image: postgres:13
+    container_name: housing-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: housing_user
+      POSTGRES_PASSWORD: housing_user
+      POSTGRES_DB: housing
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  housing-api:
+    build: ./housing-api
+    container_name: housing-api
+    ports:
+      - "5001:5000"
+    environment:
+      DB_USER: housing_user
+      DB_PASSWORD: housing_user
+      DB_HOST: housing-db
+      DB_PORT: 5432
+      DB_NAME: housing
+      FLASK_DEBUG: 1
+    depends_on:
+      - housing-db
+
+  housing-consumer:
+    build: ./housing-consumer
+    container_name: housing-consumer
+    depends_on:
+      - broker
+      - housing-api
+    environment:
+      KAFKA_BROKER_URL: broker:9092
+
+  housing-model:
+    build: ./housing-model
+    container_name: housing-model
+    depends_on:
+      - mlflow-server
+    ports:
+      - "5002:5000"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: sqlite:////mlflow-artifacts/mlflow.db
+      MLFLOW_ARTIFACT_ROOT: /mlflow-artifacts
+    volumes:
+      - ./mlflow:/mlflow-artifacts
+      - ./mlflow/mlflow.db:/mlflow/mlflow.db
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root /mlflow-artifacts
+volumes:
+  postgres_data:

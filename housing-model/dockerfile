@@ -1,0 +1,18 @@
+# Utiliser une image Python 3.10 légère comme base
+FROM python:3.10-slim
+
+# Définir le répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copier les fichiers nécessaires dans l'image Docker
+COPY requirements.txt .
+COPY app.py .
+
+# Installer les dépendances
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Exposer le port utilisé par l'application Flask
+EXPOSE 5000
+
+# Démarrer l'API
+CMD ["python", "app.py"]
